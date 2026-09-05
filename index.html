@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Dashboard - Produção</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; line-height: 1.6; }
+        form { background: #f4f4f4; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        input, button { display: block; width: 100%; margin: 10px 0; padding: 10px; box-sizing: border-box; }
+        button { background: #28a745; color: white; border: none; font-size: 16px; cursor: pointer; }
+        button:hover { background: #218838; }
+        ul { list-style: none; padding: 0; }
+        li { background: #eee; margin: 5px 0; padding: 10px; border-radius: 4px; display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
+
+    <h2>Registrar Pontuação</h2>
+    <form id="meuFormulario">
+        <input type="text" id="nome" placeholder="Nome do Jogador" required>
+        <input type="number" id="pontuacao" placeholder="Pontuação (Inteiro)" required>
+        <button type="submit">Enviar Dados</button>
+    </form>
+
+    <h2>Placar Atual</h2>
+    <ul id="listaRanking">
+        <li>Carregando dados...</li>
+    </ul>
+
+    <script>
+        // INTERRUPTOR DE PRODUÇÃO:
+        // Local: http://localhost:3000
+        // Produção: Substitua pela URL gerada pelo Render (ex: https://onrender.com)
+        //const API_URL = "http://localhost:3000"; 
+        // BOA PRÁTICA: Detecção automática do ambiente
+const API_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.protocol === "file:"
+    ? "http://localhost:3000" // Se estiver no seu PC
+    : "https://onrender.com"; // ⚠️ SUBISTITUA COM O LINK DO RENDER DEPOIS QUE DEPLOYAR
+
+
+        const formulario = document.getElementById('meuFormulario');
+        const lista = document.getElementById('listaRanking');
+
+        // Função para buscar dados da API e atualizar a tela
+        async function atualizarDashboard() {
+            try {
+                const resposta = await fetch(`${API_URL}/api/ranking`);
+                const dados = await resposta.json();
+                
+                lista.innerHTML = ""; // Limpa a lista
+                
+                dados.forEach(jogador => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>${jogador.nome}</strong> <span>${jogador.pontuacao} pts</span>`;
+                    lista.appendChild(li);
+                });
+            } catch (erro) {
+                lista.innerHTML = "<li>Erro ao conectar com o servidor.</li>";
+                console.error("Erro ao buscar dados:", erro);
+            }
+        }
+
+        // Evento de envio do formulário manual
+        formulario.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const nome = document.getElementById('nome').value;
+            const pontuacao = document.getElementById('pontuacao').value;
+
+            try {
+                const resposta = await fetch(`${API_URL}/api/ranking`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, pontuacao })
+                });
+
+                if (resposta.ok) {
+                    document.getElementById('nome').value = "";
+                    document.getElementById('pontuacao').value = "";
+                    atualizarDashboard(); // Recarrega a lista na tela
+                } else {
+                    alert("Erro ao salvar os dados no servidor.");
+                }
+            } catch (erro) {
+                alert("Não foi possível comunicar com o servidor.");
+                console.error("Erro no envio:", erro);
+            }
+        });
+
+        // Executa ao carregar a página pela primeira vez
+        atualizarDashboard();
+    </script>
+</body>
+</html>
