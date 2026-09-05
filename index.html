@@ -35,8 +35,8 @@
         //const API_URL = "http://localhost:3000"; 
         // BOA PRÁTICA: Detecção automática do ambiente
 const API_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.protocol === "file:"
-    ? "http://localhost:3000" // Se estiver no seu PC
-    : "https://onrender.com"; // ⚠️ SUBISTITUA COM O LINK DO RENDER DEPOIS QUE DEPLOYAR
+    ? "http://localhost:3000" 
+    : "https://back-end-node-api.onrender.com"; // 👈 Atualizado com o link gerado pelo Render
 
 
         const formulario = document.getElementById('meuFormulario');
